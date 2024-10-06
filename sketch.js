@@ -6,7 +6,9 @@ let fadeDuration = 10000;
 let isPlaying = false;  // To check if video has started playing
 
 function preload() {
-  video = createVideo(['./vid/kid.mp4']);
+  // Adding 'playsinline' attribute to the video to prevent fullscreen on iOS
+  video = createVideo(['./vid/kid.mp4'], videoLoaded);
+  video.attribute('playsinline', '');  // Prevent iOS fullscreen on video play
   video.hide();  // Hide the HTML video loader
 }
 
@@ -54,7 +56,7 @@ function draw() {
 // Start video loop when the user interacts for the first time
 function mousePressed() {
   if (!isPlaying) {
-    video.loop();  // Start the video looping
+    video.play();  // Start the video
     isPlaying = true;  // Ensure this only happens once
   }
 }
@@ -62,9 +64,14 @@ function mousePressed() {
 // Start video loop when the user taps on a mobile device
 function touchStarted() {
   if (!isPlaying) {
-    video.loop();  // Start the video looping
+    video.play();  // Start the video
     isPlaying = true;  // Ensure this only happens once
   }
+}
+
+// Callback function when video is loaded
+function videoLoaded() {
+  video.loop();  // Loop the video once it's loaded
 }
 
 // Clear fog with circular brush
