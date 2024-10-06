@@ -1,38 +1,105 @@
-let vid;
-let playing = true;
+let video;
+let clearedMask;  
+let maskImage;
+let strokes = []; 
+let fadeDuration = 10000; 
+let isPlaying = false;  // To check if video has started playing
+
+function preload() {
+  video = createVideo(['./vid/kid.mp4']);
+  video.hide();  // Hide the HTML video loader
+}
 
 function setup() {
-  createCanvas(400, 400);
-  // noCanvas();
+  createCanvas(windowWidth, windowHeight);
+  video.volume(0);  // Mute the video
 
-  vid = createVideo("iwaswrong.mp4");
-  vid.size(400, 400);
-  vid.volume(0);
-  vid.loop();
-  vid.hide(); // hides the html video loader
-  // vid.position(0.0);
-
+  // Create a graphics buffer for the mask
+  clearedMask = createGraphics(width, height);
+  clearedMask.clear();  // Start a transparent buffer
+  
+  maskImage = createGraphics(width, height);
+  maskImage.fill(0);  // Fill with black (invisible)
+  maskImage.noStroke();
 }
 
 function draw() {
-  background(220);
-  let img = vid.get();
-  image(img, 0, 0); // redraws the video frame by frame in                           p5
-  textSize(40);
-  counter = nf(vid.time(), 0, 2); // first argument is decimal places to the left (use zero to default to places necessary)
-  text(counter, 10, 300);
+  background(0);
+  textSize(80);
+  fill(200);
+  textAlign(CENTER, CENTER);
+  text("Tap to Start", width / 2, height / 2); 
+  image(video, 0, 0, width, height);
+  filter(BLUR, 8);
+
+  // Clear fog with mouse press or touch
+  if (mouseIsPressed) {
+    clearFog(mouseX, mouseY);  // For desktop users
+  }
+
+  // Handle touches for mobile users
+  if (touches.length > 0) {
+    clearFog(touches[0].x, touches[0].y);  // First touch point
+  }
+
+  // Update & shrink strokes overtime
+  updateStrokes();
+
+  // Apply mask to reveal clear video
+  let maskedVideo = video.get();
+  maskedVideo.mask(clearedMask);  // Dynamic mask
+  image(maskedVideo, 0, 0, width, height);
 }
 
-// function keyPressed() {
-//  vid.time(random(vid.duration())) 
-// }
-
+// Start video loop when the user interacts for the first time
 function mousePressed() {
- if (playing) {
-   vid.pause();
- }
-  else {
-    vid.play();
+  if (!isPlaying) {
+    video.loop();  // Start the video looping
+    isPlaying = true;  // Ensure this only happens once
   }
-  playing = !playing;
+}
+
+// Start video loop when the user taps on a mobile device
+function touchStarted() {
+  if (!isPlaying) {
+    video.loop();  // Start the video looping
+    isPlaying = true;  // Ensure this only happens once
+  }
+}
+
+// Clear fog with circular brush
+function clearFog(x, y) {
+  let brushSize = 100;  
+
+  // Add brush stroke to the strokes array with timestamp
+  strokes.push({ x: x, y: y, size: brushSize, time: millis() });
+}
+
+// Function to update and draw all strokes (shrinking them over time)
+function updateStrokes() {
+  clearedMask.clear();  // Clear stroke
+
+  let currentTime = millis();
+
+  // Loop through all the strokes and update them
+  for (let i = strokes.length - 1; i >= 0; i--) {
+    let stroke = strokes[i];
+    let elapsedTime = currentTime - stroke.time;
+
+    // Calculate how long has passed
+    let fadeProgress = elapsedTime / fadeDuration;
+    
+    if (fadeProgress >= 1) {
+      // If stroke fully fades, remove it
+      strokes.splice(i, 1);
+    } else {
+      // Calculate stroke size based on fade progress
+      let currentSize = stroke.size * (1 - fadeProgress);
+
+      // Shrink stroke on mask (revealing the video)
+      clearedMask.fill(255);  // White is visible in the mask
+      clearedMask.noStroke();
+      clearedMask.ellipse(stroke.x, stroke.y, currentSize, currentSize);
+    }
+  }
 }
