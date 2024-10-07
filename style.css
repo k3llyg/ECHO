@@ -1,0 +1,48 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.container {
+  width: 90%; /* Percentage-based width for responsive layout */
+  margin: 0 auto; /* Center the container */
+}
+
+/* Mobile ( screens < 768px) */
+@media only screen and (max-width: 768px) {
+  body {
+      font-size: 1rem;
+  }
+  .container {
+      width: 100%; /* Full width on small devices */
+  }
+
+  .video-container {
+      width: 100vw;  /* Video width  = viewport width */
+      height: 100vh; /* Video height = the viewport height */
+      overflow: hidden; /* Crop any overflow */
+  }
+}
+
+/* Tablet (screen 768px - 1024px) */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+  body {
+      font-size: 1.2rem;
+  }
+  .container {
+      width: 90%;
+  }
+}
+
+/* Desktop (screens > 1024px) */
+@media only screen and (min-width: 1025px) {
+  body {
+      font-size: 1.4rem;
+  }
+  .container {
+      width: 80%;
+  }
+}
